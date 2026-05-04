@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/deepseek/(.*)", "destination": "/api/deepseek" },
+    { "source": "/api/deepseek", "destination": "/api/deepseek" }
+  ]
+}
