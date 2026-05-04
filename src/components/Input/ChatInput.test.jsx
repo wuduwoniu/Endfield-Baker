@@ -7,20 +7,29 @@ vi.mock('../../store/chatStore', () => ({
       isStreaming: false,
       sendMessage: vi.fn(),
       stopStream: vi.fn(),
+      setPrompt: vi.fn(),
+      messages: [],
     }
     return selector ? selector(state) : state
   }),
 }))
 
+vi.mock('../CharacterContext', () => ({
+  useCharacter: vi.fn(() => ({
+    character: { id: 'zhuang-fangyi', name: '庄方宜', avatar: '/test.png', prompt: 'test prompt' },
+  })),
+}))
+
 describe('ChatInput', () => {
-  it('renders textarea and send button', () => {
+  it('renders input and emoji/plus buttons', () => {
     render(<ChatInput />)
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument()
-    expect(screen.getByText('发送')).toBeInTheDocument()
+    expect(screen.getByLabelText('表情')).toBeInTheDocument()
+    expect(screen.getByLabelText('添加')).toBeInTheDocument()
   })
 
-  it('send button is disabled when input is empty', () => {
+  it('does not show send button when input is empty', () => {
     render(<ChatInput />)
-    expect(screen.getByText('发送')).toBeDisabled()
+    expect(screen.queryByLabelText('发送')).not.toBeInTheDocument()
   })
 })

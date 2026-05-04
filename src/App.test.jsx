@@ -8,10 +8,14 @@ vi.mock('./store/chatStore', () => ({
   }),
 }))
 
+vi.mock('./hooks/useTheme', () => ({
+  useTheme: vi.fn(() => ({ isDark: false, toggle: vi.fn() })),
+}))
+
 describe('App', () => {
-  it('renders main layout with header and welcome', () => {
+  it('renders main layout with header and input', () => {
     render(<App />)
-    expect(screen.getByText('DeepSeek')).toBeInTheDocument()
-    expect(screen.getByText('有什么可以帮你的？')).toBeInTheDocument()
+    expect(screen.getByText(/BAKER/)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument()
   })
 })

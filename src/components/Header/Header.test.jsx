@@ -1,24 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import Header from './Header'
 
-vi.mock('../../store/chatStore', () => ({
-  useChatStore: vi.fn(() => ({
-    currentMode: 'fast',
-    setMode: vi.fn(),
-    toggleSidebar: vi.fn(),
-  })),
-}))
-
-vi.mock('../../hooks/useTheme', () => ({
-  useTheme: vi.fn(() => ({ isDark: false, toggle: vi.fn() })),
-}))
-
 describe('Header', () => {
-  it('renders logo and mode selector', () => {
+  it('renders BAKER path', () => {
     render(<Header />)
-    expect(screen.getByText('DeepSeek')).toBeInTheDocument()
-    expect(screen.getByText('Fast')).toBeInTheDocument()
-    expect(screen.getByText('Expert')).toBeInTheDocument()
-    expect(screen.getByText('Vision')).toBeInTheDocument()
+    expect(screen.getByText(/BAKER/)).toBeInTheDocument()
+    expect(screen.getByText(/会话消息/)).toBeInTheDocument()
+  })
+
+  it('renders player info', () => {
+    render(<Header />)
+    expect(screen.getByText('终端管理员')).toBeInTheDocument()
   })
 })

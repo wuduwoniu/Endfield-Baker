@@ -10,16 +10,14 @@ export const useChatStore = create((set, get) => ({
   currentMode: 'fast',
   isStreaming: false,
   error: null,
-  sidebarOpen: false,
   abortController: null,
+  currentPrompt: null,
 
   setMode: (mode) => {
     if (MODELS[mode]) set({ currentMode: mode })
   },
 
-  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-
-  closeSidebar: () => set({ sidebarOpen: false }),
+  setPrompt: (prompt) => set({ currentPrompt: prompt }),
 
   clearMessages: () => set({ messages: [], error: null }),
 
@@ -38,10 +36,15 @@ export const useChatStore = create((set, get) => ({
     set({ abortController: controller })
 
     try {
-      const { currentMode } = get()
-      const apiMessages = get().messages.map(({ role, content }) => ({ role, content }))
+      const { currentMode, currentPrompt } = get()
+      const historyMessages = get().messages
+        .filter((m) => m.content) // skip empty assistant placeholder
+        .map(({ role, content }) => ({ role, content }))
+      if (currentPrompt) {
+        historyMessages.unshift({ role: 'system', content: currentPrompt })
+      }
 
-      const stream = await sendChatMessage(apiMessages, { mode: currentMode, signal: controller.signal })
+      const stream = await sendChatMessage(historyMessages, { mode: currentMode, signal: controller.signal })
       const generator = parseSSEStream(stream)
 
       for await (const chunk of generator) {

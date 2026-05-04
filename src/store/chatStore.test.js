@@ -13,7 +13,7 @@ describe('chatStore', () => {
       currentMode: 'fast',
       isStreaming: false,
       error: null,
-      sidebarOpen: false,
+      currentPrompt: null,
     })
   })
 
@@ -23,7 +23,7 @@ describe('chatStore', () => {
     expect(state.currentMode).toBe('fast')
     expect(state.isStreaming).toBe(false)
     expect(state.error).toBeNull()
-    expect(state.sidebarOpen).toBe(false)
+    expect(state.currentPrompt).toBeNull()
   })
 
   it('setMode changes current mode', () => {
@@ -31,11 +31,9 @@ describe('chatStore', () => {
     expect(useChatStore.getState().currentMode).toBe('expert')
   })
 
-  it('toggleSidebar flips sidebar state', () => {
-    useChatStore.getState().toggleSidebar()
-    expect(useChatStore.getState().sidebarOpen).toBe(true)
-    useChatStore.getState().toggleSidebar()
-    expect(useChatStore.getState().sidebarOpen).toBe(false)
+  it('setPrompt stores character prompt', () => {
+    useChatStore.getState().setPrompt('test prompt')
+    expect(useChatStore.getState().currentPrompt).toBe('test prompt')
   })
 
   it('clearMessages empties messages array', () => {
