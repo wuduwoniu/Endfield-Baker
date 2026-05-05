@@ -14,6 +14,8 @@ export default function ChatInput() {
   const [stickerQueue, setStickerQueue] = useState([])
   const isStreaming = useChatStore((s) => s.isStreaming)
   const sendMessage = useChatStore((s) => s.sendMessage)
+  const addUserText = useChatStore((s) => s.addUserText)
+  const triggerAiReply = useChatStore((s) => s.triggerAiReply)
   const sendSticker = useChatStore((s) => s.sendSticker)
   const sendStickerReply = useChatStore((s) => s.sendStickerReply)
   const stopStream = useChatStore((s) => s.stopStream)
@@ -28,23 +30,25 @@ export default function ChatInput() {
     if (isStreaming) return
 
     setText('')
+    const stickers = [...stickerQueue]
     setStickerQueue([])
 
     if (messages.length === 0 && character.prompt) {
       setPrompt(character.prompt)
     }
 
-    if (trimmed) {
+    if (trimmed && hasStickers) {
+      // Text + stickers: add text first, then stickers, THEN trigger AI reply
+      addUserText(trimmed)
+      stickers.forEach((key) => sendSticker(key))
+      triggerAiReply()
+    } else if (trimmed) {
       sendMessage(trimmed)
+    } else if (hasStickers) {
+      stickers.forEach((key) => sendSticker(key))
+      setTimeout(() => sendStickerReply(), 500)
     }
-
-    if (hasStickers) {
-      stickerQueue.forEach((key) => sendSticker(key))
-      if (!trimmed) {
-        setTimeout(() => sendStickerReply(), 500)
-      }
-    }
-  }, [text, stickerQueue, isStreaming, sendMessage, sendSticker, sendStickerReply, setPrompt, messages.length, character.prompt])
+  }, [text, stickerQueue, isStreaming, sendMessage, addUserText, triggerAiReply, sendSticker, sendStickerReply, setPrompt, messages.length, character.prompt])
 
   const handleEmojiSelect = useCallback((key) => {
     const emotion = getEmojiText(key)

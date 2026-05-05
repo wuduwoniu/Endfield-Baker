@@ -6,6 +6,8 @@ vi.mock('../../store/chatStore', () => ({
     const state = {
       isStreaming: false,
       sendMessage: vi.fn(),
+      addUserText: vi.fn(),
+      triggerAiReply: vi.fn(),
       sendSticker: vi.fn(),
       sendStickerReply: vi.fn(),
       stopStream: vi.fn(),

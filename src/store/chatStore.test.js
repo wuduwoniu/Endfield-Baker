@@ -65,6 +65,28 @@ describe('chatStore', () => {
     expect(messages[0].content).toBe('sticker_game_001')
   })
 
+  it('addUserText adds a user text message without triggering AI', () => {
+    const { addUserText } = useChatStore.getState()
+    useChatStore.setState({ messages: [] })
+    addUserText('Hello')
+    const { messages, isStreaming } = useChatStore.getState()
+    expect(messages).toHaveLength(1)
+    expect(messages[0].role).toBe('user')
+    expect(messages[0].content).toBe('Hello')
+    expect(isStreaming).toBe(false)
+  })
+
+  it('triggerAiReply creates assistant placeholder and starts streaming', () => {
+    const { triggerAiReply } = useChatStore.getState()
+    useChatStore.setState({ messages: [{ id: '1', role: 'user', content: 'Hi', timestamp: 1 }] })
+    triggerAiReply()
+    const { messages, isStreaming } = useChatStore.getState()
+    expect(messages).toHaveLength(2)
+    expect(messages[1].role).toBe('assistant')
+    expect(messages[1].content).toBe('')
+    expect(isStreaming).toBe(true)
+  })
+
   it('sendStickerReply adds an AI sticker message after delay', async () => {
     vi.useFakeTimers()
     const { sendStickerReply } = useChatStore.getState()

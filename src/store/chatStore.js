@@ -91,6 +91,54 @@ export const useChatStore = create((set, get) => ({
     set({ isStreaming: false, error: errorMsg })
   },
 
+  /** Add a user text message without triggering AI */
+  addUserText: (text) => {
+    const userMsg = { id: genMsgId(), role: 'user', content: text, timestamp: Date.now() }
+    set((state) => ({
+      messages: [...state.messages, userMsg],
+    }))
+    return userMsg.id
+  },
+
+  /** Trigger AI reply based on current messages */
+  triggerAiReply: async () => {
+    const assistantMsg = { id: genMsgId(), role: 'assistant', content: '', timestamp: Date.now() }
+
+    set((state) => ({
+      messages: [...state.messages, assistantMsg],
+      isStreaming: true,
+      error: null,
+    }))
+
+    const controller = new AbortController()
+    set({ abortController: controller })
+
+    try {
+      const { currentMode, currentPrompt } = get()
+      const historyMessages = get().messages
+        .filter((m) => m.content)
+        .map(({ role, content }) => ({ role, content }))
+      if (currentPrompt) {
+        historyMessages.unshift({ role: 'system', content: currentPrompt })
+      }
+
+      const stream = await sendChatMessage(historyMessages, { mode: currentMode, signal: controller.signal })
+      const generator = parseSSEStream(stream)
+
+      for await (const chunk of generator) {
+        get().appendChunk(assistantMsg.id, chunk)
+      }
+
+      get().finishStream(assistantMsg.id)
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        get().stopStream()
+      } else {
+        set({ isStreaming: false, error: err.message })
+      }
+    }
+  },
+
   sendSticker: (key) => {
     const stickerMsg = {
       id: genMsgId(),
