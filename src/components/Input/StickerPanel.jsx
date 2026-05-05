@@ -6,7 +6,7 @@ const BAKER = '/baker-assets'
 
 const TABS = [
   { key: 'emoji', icon: `${BAKER}/icons/chat_emoji.png`, label: 'Emoji' },
-  { key: 'sticker', icon: `${BAKER}/icons/icon_sns_chat_emoticon.png`, label: '贴图' },
+  { key: 'sticker', icon: `${BAKER}/stickers/game/sticker_game_001.png`, label: '贴图' },
 ]
 
 export default function StickerPanel({ onSelectEmoji, onSelectSticker, onClose }) {
@@ -43,7 +43,7 @@ export default function StickerPanel({ onSelectEmoji, onSelectSticker, onClose }
         {/* Right content area */}
         <div className="flex-1 p-3 overflow-y-auto max-h-[320px]">
           {tab === 'emoji' ? (
-            <div className="grid grid-cols-8 gap-2">
+            <div className="grid grid-cols-8 gap-2 max-h-[136px] overflow-y-auto">
               {EMOJI_KEYS.map((key) => {
                 const src = getEmojiSrc(key)
                 return (
