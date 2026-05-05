@@ -105,17 +105,6 @@ export default function ChatInput() {
               />
             </button>
 
-            <input
-              ref={inputRef}
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={UI_TEXT.PLACEHOLDER}
-              disabled={isStreaming}
-              className="flex-1 bg-transparent border-none outline-none text-black font-medium text-sm placeholder-gray-500 min-w-0"
-            />
-
             {hasStickers && stickerQueue.map((key, i) => {
               const src = getStickerSrc(key)
               return (
@@ -131,6 +120,17 @@ export default function ChatInput() {
                 </span>
               )
             })}
+
+            <input
+              ref={inputRef}
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={UI_TEXT.PLACEHOLDER}
+              disabled={isStreaming}
+              className="flex-1 bg-transparent border-none outline-none text-black font-medium text-sm placeholder-gray-500 min-w-0"
+            />
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
