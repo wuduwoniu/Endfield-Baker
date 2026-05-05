@@ -6,6 +6,8 @@ vi.mock('../../store/chatStore', () => ({
     const state = {
       isStreaming: false,
       sendMessage: vi.fn(),
+      sendSticker: vi.fn(),
+      sendStickerReply: vi.fn(),
       stopStream: vi.fn(),
       setPrompt: vi.fn(),
       messages: [],
@@ -28,7 +30,7 @@ describe('ChatInput', () => {
     expect(screen.getByLabelText('添加')).toBeInTheDocument()
   })
 
-  it('does not show send button when input is empty', () => {
+  it('does not show send button when input is empty and no stickers', () => {
     render(<ChatInput />)
     expect(screen.queryByLabelText('发送')).not.toBeInTheDocument()
   })

@@ -3,15 +3,19 @@ import { useChatStore } from '../../store/chatStore'
 import { useCharacter } from '../CharacterContext'
 import { UI_TEXT } from '../../config'
 import { getEmojiText } from '../../config/emojis'
-import EmojiPanel from './EmojiPanel'
+import { getStickerSrc } from '../../config/stickers'
+import StickerPanel from './StickerPanel'
 
 const BAKER = '/baker-assets'
 
 export default function ChatInput() {
   const [text, setText] = useState('')
-  const [showEmojiPanel, setShowEmojiPanel] = useState(false)
+  const [showStickerPanel, setShowStickerPanel] = useState(false)
+  const [stickerQueue, setStickerQueue] = useState([])
   const isStreaming = useChatStore((s) => s.isStreaming)
   const sendMessage = useChatStore((s) => s.sendMessage)
+  const sendSticker = useChatStore((s) => s.sendSticker)
+  const sendStickerReply = useChatStore((s) => s.sendStickerReply)
   const stopStream = useChatStore((s) => s.stopStream)
   const setPrompt = useChatStore((s) => s.setPrompt)
   const messages = useChatStore((s) => s.messages)
@@ -19,13 +23,28 @@ export default function ChatInput() {
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim()
-    if (!trimmed || isStreaming) return
+    const hasStickers = stickerQueue.length > 0
+    if (!trimmed && !hasStickers) return
+    if (isStreaming) return
+
     setText('')
+    setStickerQueue([])
+
     if (messages.length === 0 && character.prompt) {
       setPrompt(character.prompt)
     }
-    sendMessage(trimmed)
-  }, [text, isStreaming, sendMessage, setPrompt, messages.length, character.prompt])
+
+    if (trimmed) {
+      sendMessage(trimmed)
+    }
+
+    if (hasStickers) {
+      stickerQueue.forEach((key) => sendSticker(key))
+      if (!trimmed) {
+        setTimeout(() => sendStickerReply(), 500)
+      }
+    }
+  }, [text, stickerQueue, isStreaming, sendMessage, sendSticker, sendStickerReply, setPrompt, messages.length, character.prompt])
 
   const handleEmojiSelect = useCallback((key) => {
     const emotion = getEmojiText(key)
@@ -33,6 +52,20 @@ export default function ChatInput() {
       setText((prev) => prev + '[' + emotion + ']')
     }
   }, [])
+
+  const handleStickerSelect = useCallback((key) => {
+    if (text.trim()) {
+      setStickerQueue((prev) => [...prev, key])
+    } else {
+      setShowStickerPanel(false)
+      sendSticker(key)
+      setTimeout(() => sendStickerReply(), 500)
+    }
+  }, [text, sendSticker, sendStickerReply])
+
+  const removeStickerFromQueue = (index) => {
+    setStickerQueue((prev) => prev.filter((_, i) => i !== index))
+  }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -42,6 +75,7 @@ export default function ChatInput() {
   }
 
   const hasText = text.trim().length > 0
+  const hasStickers = stickerQueue.length > 0
 
   return (
     <div className="px-4 py-3">
@@ -49,7 +83,6 @@ export default function ChatInput() {
         <div className="flex items-center gap-2">
           {/* Input bar */}
           <div className="flex-1 flex items-center gap-1.5 h-10 px-2.5 rounded-full border border-border-l1" style={{ backgroundColor: 'rgb(240, 238, 238)' }}>
-            {/* Left: message/document icons */}
             <button
               type="button"
               className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors shrink-0"
@@ -62,7 +95,6 @@ export default function ChatInput() {
               />
             </button>
 
-            {/* Text input */}
             <input
               type="text"
               value={text}
@@ -72,17 +104,32 @@ export default function ChatInput() {
               disabled={isStreaming}
               className="flex-1 bg-transparent border-none outline-none text-black font-medium text-sm placeholder-gray-500 min-w-0"
             />
+
+            {/* Sticker queue thumbnails */}
+            {hasStickers && stickerQueue.map((key, i) => {
+              const src = getStickerSrc(key)
+              return (
+                <span key={`${key}-${i}`} className="inline-flex items-center shrink-0 relative">
+                  {src && <img src={src} alt={key} className="h-7 w-7 object-contain" />}
+                  <button
+                    type="button"
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gray-400 text-white text-xs flex items-center justify-center leading-none cursor-pointer"
+                    onClick={() => removeStickerFromQueue(i)}
+                  >
+                    ×
+                  </button>
+                </span>
+              )
+            })}
           </div>
 
-          {/* Right side buttons — outside input bar */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Emoji button */}
             <button
               type="button"
               className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:brightness-95 transition-all cursor-pointer"
               style={{ backgroundColor: 'rgb(240, 238, 238)' }}
               aria-label="表情"
-              onClick={() => setShowEmojiPanel(true)}
+              onClick={() => setShowStickerPanel(true)}
             >
               <img
                 src={`${BAKER}/icons/chat_emoji.png`}
@@ -91,7 +138,6 @@ export default function ChatInput() {
               />
             </button>
 
-            {/* Plus button */}
             <button
               type="button"
               className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:brightness-95 transition-all cursor-pointer"
@@ -105,7 +151,6 @@ export default function ChatInput() {
               />
             </button>
 
-            {/* Send / Stop */}
             {isStreaming ? (
               <button
                 onClick={stopStream}
@@ -117,7 +162,7 @@ export default function ChatInput() {
                   <rect x="4" y="4" width="16" height="16" rx="2" />
                 </svg>
               </button>
-            ) : hasText ? (
+            ) : (hasText || hasStickers) ? (
               <button
                 onClick={handleSend}
                 className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:brightness-95 transition-all cursor-pointer"
@@ -135,11 +180,11 @@ export default function ChatInput() {
         </div>
       </div>
 
-      {/* Emoji panel overlay */}
-      {showEmojiPanel && (
-        <EmojiPanel
-          onSelect={handleEmojiSelect}
-          onClose={() => setShowEmojiPanel(false)}
+      {showStickerPanel && (
+        <StickerPanel
+          onSelectEmoji={handleEmojiSelect}
+          onSelectSticker={handleStickerSelect}
+          onClose={() => setShowStickerPanel(false)}
         />
       )}
     </div>

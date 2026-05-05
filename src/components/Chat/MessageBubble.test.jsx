@@ -23,4 +23,18 @@ describe('MessageBubble', () => {
     expect(screen.getByText('Hi there')).toBeInTheDocument()
     expect(screen.getByAltText('庄方宜')).toBeInTheDocument()
   })
+
+  it('renders sticker message with image and no tail', () => {
+    const stickerMsg = {
+      id: '1',
+      role: 'user',
+      content: 'sticker_game_001',
+      contentType: 'sticker',
+      timestamp: Date.now(),
+    }
+    render(<MessageBubble message={stickerMsg} />)
+    const img = screen.getByAltText('sticker_game_001')
+    expect(img).toBeInTheDocument()
+    expect(img).toHaveAttribute('src', '/baker-assets/stickers/game/sticker_game_001.png')
+  })
 })

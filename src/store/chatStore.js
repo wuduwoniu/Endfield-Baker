@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { MODELS } from '../config'
+import { STICKER_KEYS } from '../config/stickers'
 import { sendChatMessage, parseSSEStream } from '../api'
 
 let messageId = 0
@@ -88,5 +89,34 @@ export const useChatStore = create((set, get) => ({
 
   setStreamError: (errorMsg) => {
     set({ isStreaming: false, error: errorMsg })
+  },
+
+  sendSticker: (key) => {
+    const stickerMsg = {
+      id: genMsgId(),
+      role: 'user',
+      content: key,
+      contentType: 'sticker',
+      timestamp: Date.now(),
+    }
+    set((state) => ({
+      messages: [...state.messages, stickerMsg],
+    }))
+  },
+
+  sendStickerReply: () => {
+    setTimeout(() => {
+      const randomKey = STICKER_KEYS[Math.floor(Math.random() * STICKER_KEYS.length)]
+      const replyMsg = {
+        id: genMsgId(),
+        role: 'assistant',
+        content: randomKey,
+        contentType: 'sticker',
+        timestamp: Date.now(),
+      }
+      set((state) => ({
+        messages: [...state.messages, replyMsg],
+      }))
+    }, 500)
   },
 }))

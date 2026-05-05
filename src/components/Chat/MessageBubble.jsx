@@ -1,6 +1,7 @@
 import MarkdownContent from './MarkdownContent'
 import { useCharacter } from '../CharacterContext'
 import { parseEmojiSegments } from '../../config/emojis'
+import { getStickerSrc } from '../../config/stickers'
 
 const BAKER = '/baker-assets'
 
@@ -77,15 +78,16 @@ export default function MessageBubble({ message, isStreaming }) {
           display: 'inline-block', maxWidth: '60%', minWidth: 0,
           ...bubbleMargin,
         }}>
-          {/* SVG tail — sibling of bubble body */}
-          <div style={{
-            position: 'absolute', top: 0, [tailSide]: '-8px',
-            width: '9px', height: '20px', overflow: 'hidden',
-          }}>
-            <svg viewBox="0 0 9 20" width="100%" height="100%" preserveAspectRatio="none">
-              <path d={tailPath} fill={tailFill} />
-            </svg>
-          </div>
+          {message.contentType !== 'sticker' && (
+            <div style={{
+              position: 'absolute', top: 0, [tailSide]: '-8px',
+              width: '9px', height: '20px', overflow: 'hidden',
+            }}>
+              <svg viewBox="0 0 9 20" width="100%" height="100%" preserveAspectRatio="none">
+                <path d={tailPath} fill={tailFill} />
+              </svg>
+            </div>
+          )}
 
           {/* Bubble body */}
           <div style={{
@@ -96,7 +98,17 @@ export default function MessageBubble({ message, isStreaming }) {
             borderRadius: bubbleRadius,
             ...bubbleBg,
           }}>
-            {isRight ? (
+            {message.contentType === 'sticker' ? (
+              <div style={{ padding: '4px', textAlign: 'center' }}>
+                {(() => {
+                  const src = getStickerSrc(message.content)
+                  return src ? (
+                    <img src={src} alt={message.content}
+                      style={{ width: '120px', height: '120px', objectFit: 'contain' }} />
+                  ) : <span style={{ color: '#999' }}>[贴图]</span>
+                })()}
+              </div>
+            ) : isRight ? (
               <p style={{ whiteSpace: 'pre-wrap', margin: 0, lineHeight: 2.2 }}>
                 {parseEmojiSegments(message.content).map((seg, i) =>
                   seg.type === 'emoji' ? (
