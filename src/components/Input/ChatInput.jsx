@@ -3,7 +3,6 @@ import { useChatStore } from '../../store/chatStore'
 import { useCharacter } from '../CharacterContext'
 import { UI_TEXT } from '../../config'
 import { getEmojiText } from '../../config/emojis'
-import { getStickerSrc } from '../../config/stickers'
 import StickerPanel from './StickerPanel'
 
 const BAKER = '/baker-assets'
@@ -61,15 +60,10 @@ export default function ChatInput() {
     if (text.trim()) {
       setStickerQueue((prev) => [...prev, key])
     } else {
-      setShowStickerPanel(false)
       sendSticker(key)
       setTimeout(() => sendStickerReply(), 500)
     }
   }, [text, sendSticker, sendStickerReply])
-
-  const removeStickerFromQueue = (index) => {
-    setStickerQueue((prev) => prev.filter((_, i) => i !== index))
-  }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -110,22 +104,6 @@ export default function ChatInput() {
               className="flex-1 bg-transparent border-none outline-none text-black font-medium text-sm placeholder-gray-500 min-w-0"
             />
 
-            {/* Sticker queue thumbnails */}
-            {hasStickers && stickerQueue.map((key, i) => {
-              const src = getStickerSrc(key)
-              return (
-                <span key={`${key}-${i}`} className="inline-flex items-center shrink-0 relative">
-                  {src && <img src={src} alt={key} className="h-7 w-7 object-contain" />}
-                  <button
-                    type="button"
-                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gray-400 text-white text-xs flex items-center justify-center leading-none cursor-pointer"
-                    onClick={() => removeStickerFromQueue(i)}
-                  >
-                    ×
-                  </button>
-                </span>
-              )
-            })}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

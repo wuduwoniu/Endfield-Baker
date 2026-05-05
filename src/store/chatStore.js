@@ -116,7 +116,7 @@ export const useChatStore = create((set, get) => ({
     try {
       const { currentMode, currentPrompt } = get()
       const historyMessages = get().messages
-        .filter((m) => m.content)
+        .filter((m) => m.content && m.contentType !== 'sticker')
         .map(({ role, content }) => ({ role, content }))
       if (currentPrompt) {
         historyMessages.unshift({ role: 'system', content: currentPrompt })
