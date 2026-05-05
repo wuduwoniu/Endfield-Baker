@@ -8,14 +8,14 @@ export async function onRequestPost(context) {
   }
 
   try {
+    const bodyText = await context.request.text()
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: context.request.body,
-      duplex: 'half',
+      body: bodyText,
     })
 
     return new Response(response.body, {
