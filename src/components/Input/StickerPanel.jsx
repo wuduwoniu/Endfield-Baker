@@ -50,6 +50,7 @@ export default function StickerPanel({ onSelectEmoji, onSelectSticker, onClose }
                   <button
                     key={key}
                     type="button"
+                    tabIndex={-1}
                     className="w-14 h-14 rounded-lg bg-white/60 hover:bg-white/80 transition-colors flex items-center justify-center cursor-pointer shrink-0"
                     title={`:${key}:`}
                     onClick={() => { onSelectEmoji(key); onClose() }}
@@ -67,6 +68,7 @@ export default function StickerPanel({ onSelectEmoji, onSelectSticker, onClose }
                   <button
                     key={key}
                     type="button"
+                    tabIndex={-1}
                     className="w-16 h-16 rounded-lg bg-white/60 hover:bg-white/80 transition-colors flex items-center justify-center cursor-pointer shrink-0"
                     title={key}
                     onClick={() => onSelectSticker(key)}
