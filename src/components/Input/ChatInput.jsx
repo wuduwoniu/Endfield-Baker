@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useChatStore } from '../../store/chatStore'
 import { useCharacter } from '../CharacterContext'
 import { UI_TEXT } from '../../config'
 import { getEmojiText } from '../../config/emojis'
+import { getStickerSrc } from '../../config/stickers'
 import StickerPanel from './StickerPanel'
 
 const BAKER = '/baker-assets'
@@ -11,6 +12,7 @@ export default function ChatInput() {
   const [text, setText] = useState('')
   const [showStickerPanel, setShowStickerPanel] = useState(false)
   const [stickerQueue, setStickerQueue] = useState([])
+  const inputRef = useRef(null)
   const isStreaming = useChatStore((s) => s.isStreaming)
   const sendMessage = useChatStore((s) => s.sendMessage)
   const addUserText = useChatStore((s) => s.addUserText)
@@ -65,6 +67,15 @@ export default function ChatInput() {
     }
   }, [text, sendSticker, sendStickerReply])
 
+  const removeStickerFromQueue = (index) => {
+    setStickerQueue((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const closePanel = () => {
+    setShowStickerPanel(false)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -95,6 +106,7 @@ export default function ChatInput() {
             </button>
 
             <input
+              ref={inputRef}
               type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -104,6 +116,21 @@ export default function ChatInput() {
               className="flex-1 bg-transparent border-none outline-none text-black font-medium text-sm placeholder-gray-500 min-w-0"
             />
 
+            {hasStickers && stickerQueue.map((key, i) => {
+              const src = getStickerSrc(key)
+              return (
+                <span key={`${key}-${i}`} className="inline-flex items-center shrink-0 relative">
+                  {src && <img src={src} alt={key} className="h-7 w-7 object-contain" />}
+                  <button
+                    type="button"
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gray-400 text-white text-xs flex items-center justify-center leading-none cursor-pointer"
+                    onClick={() => removeStickerFromQueue(i)}
+                  >
+                    ×
+                  </button>
+                </span>
+              )
+            })}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -167,7 +194,7 @@ export default function ChatInput() {
         <StickerPanel
           onSelectEmoji={handleEmojiSelect}
           onSelectSticker={handleStickerSelect}
-          onClose={() => setShowStickerPanel(false)}
+          onClose={closePanel}
         />
       )}
     </div>
