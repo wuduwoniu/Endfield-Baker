@@ -53,7 +53,7 @@ export default function StickerPanel({ onSelectEmoji, onSelectSticker, onClose }
                     tabIndex={-1}
                     className="w-14 h-14 rounded-lg bg-white/60 hover:bg-white/80 transition-colors flex items-center justify-center cursor-pointer shrink-0"
                     title={`:${key}:`}
-                    onClick={() => { onSelectEmoji(key); onClose() }}
+                    onMouseDown={(e) => { e.preventDefault(); onSelectEmoji(key); onClose() }}
                   >
                     {src && <img src={src} alt={`:${key}:`} className="w-12 h-12 object-contain" />}
                   </button>
@@ -71,7 +71,7 @@ export default function StickerPanel({ onSelectEmoji, onSelectSticker, onClose }
                     tabIndex={-1}
                     className="w-16 h-16 rounded-lg bg-white/60 hover:bg-white/80 transition-colors flex items-center justify-center cursor-pointer shrink-0"
                     title={key}
-                    onClick={() => onSelectSticker(key)}
+                    onMouseDown={(e) => { e.preventDefault(); onSelectSticker(key) }}
                   >
                     {src && <img src={src} alt={key} className="w-14 h-14 object-contain" />}
                   </button>

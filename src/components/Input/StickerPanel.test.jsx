@@ -24,7 +24,7 @@ describe('StickerPanel', () => {
   it('calls onSelectEmoji with key when emoji clicked', () => {
     const fn = vi.fn()
     render(<StickerPanel onSelectEmoji={fn} onSelectSticker={() => {}} onClose={() => {}} />)
-    fireEvent.click(screen.getByTitle(':happy:'))
+    fireEvent.mouseDown(screen.getByTitle(':happy:'))
     expect(fn).toHaveBeenCalledWith('happy')
   })
 
@@ -32,7 +32,7 @@ describe('StickerPanel', () => {
     const fn = vi.fn()
     render(<StickerPanel onSelectEmoji={() => {}} onSelectSticker={fn} onClose={() => {}} />)
     fireEvent.click(screen.getByTitle('贴图'))
-    fireEvent.click(screen.getByTitle('sticker_game_001'))
+    fireEvent.mouseDown(screen.getByTitle('sticker_game_001'))
     expect(fn).toHaveBeenCalledWith('sticker_game_001')
   })
 
