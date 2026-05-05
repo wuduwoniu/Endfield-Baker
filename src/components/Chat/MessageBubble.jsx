@@ -1,5 +1,6 @@
 import MarkdownContent from './MarkdownContent'
 import { useCharacter } from '../CharacterContext'
+import { parseEmojiSegments } from '../../config/emojis'
 
 const BAKER = '/baker-assets'
 
@@ -96,7 +97,21 @@ export default function MessageBubble({ message, isStreaming }) {
             ...bubbleBg,
           }}>
             {isRight ? (
-              <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{message.content}</p>
+              <p style={{ whiteSpace: 'pre-wrap', margin: 0, lineHeight: 2.2 }}>
+                {parseEmojiSegments(message.content).map((seg, i) =>
+                  seg.type === 'emoji' ? (
+                    <img
+                      key={i}
+                      src={seg.src}
+                      alt={seg.alt}
+                      title={seg.alt}
+                      className="inline-block w-7 h-7 object-contain align-middle mx-0.5"
+                    />
+                  ) : (
+                    <span key={i}>{seg.value}</span>
+                  )
+                )}
+              </p>
             ) : (
               <>
                 <MarkdownContent content={message.content} />
